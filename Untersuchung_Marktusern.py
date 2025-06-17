@@ -33,36 +33,34 @@ if uploaded_file is not None:
         df['Average Amp (A)'] = pd.to_numeric(df['Average Amp (A)'], errors='coerce')
 
         df['Jahr'] = df['End Time'].dt.year
-        df['Monat_num'] = df['End Time'].dt.month
-        df['Tag'] = df['End Time'].dt.day
-        df['Stunde'] = df['End Time'].dt.hour
+        df['Monat'] = df['End Time'].dt.to_period('M').astype(str)
 
         st.write(df, use_container_width=True)
 
-        # --- Farbzuordnungen ---
+        # --- Farbpalette ---
         color_palette = px.colors.qualitative.Set3
 
-        # Car Verteilung Gesamt
+        # Fahrzeugverteilung berechnen
         car_counts = df['Car'].value_counts().reset_index()
         car_counts.columns = ['Car', 'Anzahl']
 
-        # Farbdictionary erstellen (alle Fahrzeugtypen)
         unique_cars = car_counts['Car'].unique()
         colors_cars_dict = {
             car: color_palette[i % len(color_palette)] for i, car in enumerate(unique_cars)
         }
 
-        # Pie-Chart erstellen
+        # === 🚘 Pie-Chart ===
+        st.subheader("🚘 Verteilung der EVs nach Fahrzeugtyp")
         fig_cars = px.pie(
             car_counts,
             names='Car',
             values='Anzahl',
-            title="🚘 Verteilung der EVs nach Fahrzeugtyp",
+            title="Fahrzeugverteilung (gesamt)",
             color='Car',
-            color_discrete_map=colors_cars_dict
+            color_discrete_map=colors_cars_dict,
+            hole=0.3  # Donut-Stil
         )
 
-        # Darstellung verbessern
         fig_cars.update_traces(
             textinfo='percent+label',
             textposition='inside',
@@ -71,9 +69,37 @@ if uploaded_file is not None:
 
         fig_cars.update_layout(
             title_font_size=24,
+            height=600,
             legend_title_text='Fahrzeugtyp',
-            legend=dict(orientation="h", y=-0.1, x=0.5, xanchor='center'),
-            margin=dict(t=50, b=50, l=0, r=0)
+            legend=dict(orientation="v", y=0.5, x=1.05),
+            margin=dict(t=80, b=50, l=50, r=150)
         )
 
         st.plotly_chart(fig_cars, use_container_width=True)
+
+        # === 📊 Zeitlicher Verlauf als gestapeltes Bar-Chart ===
+        st.subheader("📊 Zeitlicher Verlauf: Fahrzeugverteilung pro Monat")
+
+        car_month = df.groupby(['Monat', 'Car']).size().reset_index(name='Anzahl')
+
+        fig_bar = px.bar(
+            car_month,
+            x='Monat',
+            y='Anzahl',
+            color='Car',
+            color_discrete_map=colors_cars_dict,
+            title='Monatliche Verteilung der Fahrzeuge (gestapelt)'
+        )
+
+        fig_bar.update_layout(
+            xaxis_title='Monat',
+            yaxis_title='Anzahl Ladevorgänge',
+            title_font_size=24,
+            legend_title_text='Fahrzeugtyp',
+            barmode='stack',
+            height=600,
+            margin=dict(t=80, b=50, l=50, r=50),
+            xaxis_tickangle=-45
+        )
+
+        st.plotly_chart(fig_bar, use_container_width=True)
