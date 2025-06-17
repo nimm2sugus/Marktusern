@@ -43,11 +43,11 @@ if uploaded_file is not None:
         colors_cars = px.colors.qualitative.Plotly
 
         # Car Verteilung Gesamt
-        prov_counts = df['Car'].value_counts().reset_index()
-        prov_counts.columns = ['Car', 'Anzahl']
+        car_counts = df['Car'].value_counts().reset_index()
+        car_counts.columns = ['Car', 'Anzahl']
 
-        fig_cars = (px.pie(prov_counts, names='Provider', values='Anzahl',
-                          title="🏢 Top 10 Provider + Rest (gesamt)",
-                          color='Provider',
+        fig_cars = (px.pie(car_counts, names='Car', values='Anzahl',
+                          title="🚘 EV",
+                          color='Car',
                           color_discrete_map=colors_cars))
         st.plotly_chart(fig_cars, use_container_width=True)
