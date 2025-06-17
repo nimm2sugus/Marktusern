@@ -40,14 +40,26 @@ if uploaded_file is not None:
         st.write(df, use_container_width=True)
 
         # --- Farbzuordnungen ---
-        colors_cars = px.colors.qualitative.Plotly
+        # Farbpalette als Liste
+        color_palette = px.colors.qualitative.Plotly
 
         # Car Verteilung Gesamt
         car_counts = df['Car'].value_counts().reset_index()
         car_counts.columns = ['Car', 'Anzahl']
 
-        fig_cars = (px.pie(car_counts, names='Car', values='Anzahl',
-                          title="🚘 EV",
-                          color='Car',
-                          color_discrete_map=colors_cars))
+        # Dictionary für color_discrete_map erstellen
+        unique_cars = car_counts['Car'].unique()
+        colors_cars_dict = {
+            car: color_palette[i % len(color_palette)] for i, car in enumerate(unique_cars)
+        }
+
+        # Kuchendiagramm mit Farbdictionary
+        fig_cars = px.pie(
+            car_counts,
+            names='Car',
+            values='Anzahl',
+            title="🚘 EV",
+            color='Car',
+            color_discrete_map=colors_cars_dict
+        )
         st.plotly_chart(fig_cars, use_container_width=True)
