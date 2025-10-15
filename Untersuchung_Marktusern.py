@@ -107,29 +107,3 @@ if uploaded_file is not None:
         )
 
         st.plotly_chart(fig_bar, use_container_width=True)
-
-        # === NEU: 📈 Zeitlicher Verlauf der prozentualen Anteile ===
-        st.subheader("📈 Monatliche Entwicklung der Fahrzeug-Anteile")
-
-        fig_bar_percent = px.bar(
-            car_month,
-            x='Monat',
-            y='Anzahl',
-            color='Car',
-            color_discrete_map=colors_cars_dict,
-            title='Monatliche Anteile der Fahrzeuge (Normalisiert auf 100%)',
-            barnorm='percent'  # Dieser Parameter normalisiert die Balken auf 100%
-        )
-
-        fig_bar_percent.update_layout(
-            xaxis_title='Monat',
-            yaxis_title='Anteil der Ladevorgänge (%)',
-            title_font_size=24,
-            legend_title_text='Fahrzeugtyp',
-            barmode='stack',
-            height=600,
-            margin=dict(t=80, b=50, l=50, r=50),
-            xaxis_tickangle=-45
-        )
-
-        st.plotly_chart(fig_bar_percent, use_container_width=True)
