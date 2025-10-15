@@ -32,6 +32,9 @@ if uploaded_file is not None:
         df['Average Power (kW)'] = pd.to_numeric(df['Average Power (kW)'], errors='coerce')
         df['Average Amp (A)'] = pd.to_numeric(df['Average Amp (A)'], errors='coerce')
 
+        # Zeilen entfernen, bei denen 'End Time' ungültig ist, da sie für die Analyse entscheidend sind
+        df.dropna(subset=['End Time'], inplace=True)
+
         df['Jahr'] = df['End Time'].dt.year
         df['Monat'] = df['End Time'].dt.to_period('M').astype(str)
 
@@ -77,10 +80,11 @@ if uploaded_file is not None:
 
         st.plotly_chart(fig_cars, use_container_width=True)
 
-        # === 📊 Zeitlicher Verlauf als gestapeltes Bar-Chart ===
-        st.subheader("📊 Zeitlicher Verlauf: Fahrzeugverteilung pro Monat")
+        # === 📊 Zeitlicher Verlauf als gestapeltes Bar-Chart (Absolute Zahlen) ===
+        st.subheader("📊 Zeitlicher Verlauf: Fahrzeugverteilung pro Monat (Absolute Zahlen)")
 
         car_month = df.groupby(['Monat', 'Car']).size().reset_index(name='Anzahl')
+        car_month = car_month.sort_values('Monat') # Sortieren der Monate für korrekte Darstellung
 
         fig_bar = px.bar(
             car_month,
@@ -103,3 +107,29 @@ if uploaded_file is not None:
         )
 
         st.plotly_chart(fig_bar, use_container_width=True)
+
+        # === NEU: 📈 Zeitlicher Verlauf der prozentualen Anteile ===
+        st.subheader("📈 Monatliche Entwicklung der Fahrzeug-Anteile")
+
+        fig_bar_percent = px.bar(
+            car_month,
+            x='Monat',
+            y='Anzahl',
+            color='Car',
+            color_discrete_map=colors_cars_dict,
+            title='Monatliche Anteile der Fahrzeuge (Normalisiert auf 100%)',
+            barnorm='percent'  # Dieser Parameter normalisiert die Balken auf 100%
+        )
+
+        fig_bar_percent.update_layout(
+            xaxis_title='Monat',
+            yaxis_title='Anteil der Ladevorgänge (%)',
+            title_font_size=24,
+            legend_title_text='Fahrzeugtyp',
+            barmode='stack',
+            height=600,
+            margin=dict(t=80, b=50, l=50, r=50),
+            xaxis_tickangle=-45
+        )
+
+        st.plotly_chart(fig_bar_percent, use_container_width=True)
