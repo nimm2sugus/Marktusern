@@ -35,7 +35,7 @@ if uploaded_file is not None:
         df['Jahr'] = df['End Time'].dt.year
         df['Monat'] = df['End Time'].dt.to_period('M').astype(str)
 
-        st.write(df, use_container_width=True)
+        st.write(df)
 
         # --- Farbpalette ---
         color_palette = px.colors.qualitative.Set3
